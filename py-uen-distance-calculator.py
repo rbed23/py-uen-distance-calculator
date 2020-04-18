@@ -41,8 +41,6 @@ def calcLLA2UENdistance(ref,probe):
     probe_north_rads = radians(probe['lat'] - ref['lat'])
     UEN_point[2] = probe_north_rads * r_ref
     
-    print(UEN_point)
-
     #Up Adjusted: Altitude adjusted for Earth curvature:
     #Ri = sqrt(uen(2)^2 + uen(3)^2);
     Ri = sqrt(UEN_point[1]**2 + UEN_point[2]**2)
@@ -53,7 +51,6 @@ def calcLLA2UENdistance(ref,probe):
     UENPoint = namedtuple('uenpoint', 'up east north')
     UENtup = UENPoint._make(UEN_point)
 
-    print(UENtup)
     #calculate the distance
     dist = sqrt(UENtup.north**2+UENtup.east**2)
     distWithAlt = sqrt(dist**2 + UENtup.up**2)
