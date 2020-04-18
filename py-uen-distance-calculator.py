@@ -1,4 +1,4 @@
-'''performs basic metrics analysis on GFM donations'''
+'''performs LLA2UEN translation for distance calculations'''
 #!/usr/bin/env python
 
 import  sys
@@ -59,19 +59,32 @@ def calcLLA2UENdistance(ref,probe):
     print (f'UEN dist adjusted for altitude (in km): {distWithAlt*0.001:.3f}')
 
 def alt_units_conversion(feet):
-    return feet * 0.3048
+    '''converts feet to meters
+    <type feet> float
+    <desc feet> value in imperial units (feet)
+
+    <<type return>> float
+    <<type return>> value in metric units (meters)
+    '''
+    return feet * 0.3048                    # feet-to-meters conversion
 
 def units_validate(value):
+    '''
+    validates the unit characterization of value
+    <type value> float
+    <desc value> n/a
+    '''
     unit_validate = input(f"Is this value <{value}> in\
      'meters' or 'feet'? : ").lower()
-    if unit_validate[0] == 'f':
+    if unit_validate[0] == 'f':             # if unit is in feet, convert value
         return alt_units_conversion(value)
-    elif unit_validate[0] == 'm':
+    elif unit_validate[0] == 'm':           # if unit is in meters, return value
         return value
-    else:
+    else:                                   # if unit is neither, ask again
         return units_validate(value)
 
 def main():
+    '''start distance calculation script'''
 
     print("please enter reference location (lat, lon, alt)")
     reference_point = {
