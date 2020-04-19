@@ -16,14 +16,14 @@ def calcLLA2UENdistance(ref,probe):
     <desc probe> probe point in LLA format
 
     '''    
-    #D2R = pi/180.0              # degrees to radians conversion
-    FLATTEN = 1/298.257223563   # WGS84 flattening constant
-    R_EARTH = 6378137           # WGS84 equatorial earth radius
+    #D2R = pi/180.0                  # degrees to radians conversion
+    FLATTEN = 1/298.257223563       # WGS84 flattening constant
+    R_EARTH = 6378137               # WGS84 equatorial earth radius
+    NAV_E2 = (2-FLATTEN)*FLATTEN    # also e^2
     
-    # Determine earth radius at the reference point latitude:
+    # Determine earth radius at the point latitude:
     slat = sin(radians(probe["lat"]))
     clat = cos(radians(probe["lat"]))
-    NAV_E2 = (2-FLATTEN)*FLATTEN # also e^2
     r_ref = R_EARTH / sqrt(1 - NAV_E2 * slat * slat)     
     
     UEN_point = [0,0,0]
@@ -33,20 +33,22 @@ def calcLLA2UENdistance(ref,probe):
     
     #East = longitude:
     #uen(2) = (lla(2)-reflla(2)) * clat * D2R*r;
-    probe_east_rads = radians(probe['lon'] - ref['lon'])
-    UEN_point[1] = probe_east_rads * clat * r_ref
+    delta_east_radians = radians(probe['lon'] - ref['lon'])
+    UEN_point[1] = delta_east_radians * clat * r_ref
  
     #North = latitude:
     #uen(3) = (lla(1)-reflla(1)) * D2R*r;
-    probe_north_rads = radians(probe['lat'] - ref['lat'])
-    UEN_point[2] = probe_north_rads * r_ref
+    delta_north_radians = radians(probe['lat'] - ref['lat'])
+    UEN_point[2] = delta_north_radians * r_ref
     
     #Up Adjusted: Altitude adjusted for Earth curvature:
     #Ri = sqrt(uen(2)^2 + uen(3)^2);
     Ri = sqrt(UEN_point[1]**2 + UEN_point[2]**2)
     h = r_ref * (1 / (cos(Ri / r_ref)) - 1)
+
     #uen(1) = lla(3) - h
-    UEN_point[0] -= h
+    if UEN_point[0] > h:           # check if altitude adjustment needed
+        UEN_point[0] -= h
 
     UENPoint = namedtuple('uenpoint', 'up east north')
     UENtup = UENPoint._make(UEN_point)
@@ -88,8 +90,8 @@ def main():
 
     print("please enter reference location (lat, lon, alt)")
     reference_point = {
-        "lat" : float(input("latitude:  ")),
-        "lon" : float(input("longitude: ")),
+        "lat" : float(input("latitude (in degrees): ")),
+        "lon" : float(input("longitude (in degrees): ")),
         "alt" : float(input("altitude (in meters): "))
      }
     if reference_point['alt'] != 0:
@@ -97,8 +99,8 @@ def main():
 
     print("please enter second location (lat, lon, alt)")
     probe_point = {
-        "lat" : float(input("latitude:  ")),
-        "lon" : float(input("longitude: ")),
+        "lat" : float(input("latitude (in degrees):  ")),
+        "lon" : float(input("longitude (in degrees): ")),
         "alt" : float(input("altitude (in meters): "))
      }
     if probe_point['alt'] != 0:
